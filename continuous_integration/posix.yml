@@ -1,0 +1,49 @@
+parameters:
+  name: ''
+  vmImage: ''
+  matrix: []
+
+jobs:
+- job: ${{ parameters.name }}
+  pool:
+    vmImage: ${{ parameters.vmImage }}
+  strategy:
+    matrix:
+      ${{ insert }}: ${{ parameters.matrix }}
+
+  steps:
+    - script: |
+        pip3 install flake8
+        python3 -m flake8 .
+      displayName: Lint
+      condition: eq(variables['LINT'], 'true')
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add conda to PATH
+      condition: or(startsWith(variables['PACKAGER'], 'conda'), eq(variables['PACKAGER'], 'pip'))
+    - bash: sudo chown -R $USER $CONDA
+      # On Hosted macOS, the agent user doesn't have ownership of Miniconda's installation directory/
+      # We need to take ownership if we want to update conda or install packages globally
+      displayName: Take ownership of conda installation
+      condition: eq('${{ parameters.name }}', 'macOS')
+    - script: |
+        continuous_integration/install.sh
+      displayName: 'Install without BLIS'
+      condition: ne(variables['INSTALL_BLIS'], 'true')
+    - script: |
+        continuous_integration/install_with_blis.sh
+      displayName: 'Install with BLIS'
+      condition: eq(variables['INSTALL_BLIS'], 'true')
+    - script: |
+        continuous_integration/test_script.sh
+      displayName: 'Test Library'
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFiles: '$(JUNITXML)'
+        testRunTitle: ${{ format('{0}-$(Agent.JobName)', parameters.name) }}
+      displayName: 'Publish Test Results'
+      condition: succeededOrFailed()
+    - publish: $(JUNITXML)
+    - script: |
+        bash continuous_integration/upload_codecov.sh
+      displayName: 'Upload to codecov'
+      condition: succeeded()

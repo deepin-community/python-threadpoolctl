@@ -1,0 +1,4 @@
+version=4
+
+opts="filenamemangle=s/.+\/(\d\S*)\.tar\.gz/python-threadpoolctl-$1\.tar\.gz/" \
+  https://github.com/joblib/threadpoolctl/releases .*/(\d\S*)\.tar\.gz

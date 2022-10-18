@@ -1,0 +1,28 @@
+Source: python-threadpoolctl
+Section: python
+Priority: optional
+Maintainer: Debian Science Maintainers <debian-science-maintainers@lists.alioth.debian.org>
+Uploaders:
+ Christian Kastner <ckk@debian.org>,
+Build-Depends:
+    debhelper-compat (= 12),
+    dh-python,
+    python3-all,
+Rules-Requires-Root: no
+Standards-Version: 4.5.0
+Homepage: https://github.com/joblib/threadpoolctl
+Vcs-Git: https://salsa.debian.org/science-team/python-threadpoolctl.git
+Vcs-Browser: https://salsa.debian.org/science-team/python-threadpoolctl
+
+Package: python3-threadpoolctl
+Architecture: all
+Depends:
+    ${misc:Depends},
+    ${python3:Depends},
+Description: Python helpers for common threading libraries (BLAS, OpenMP)
+ Thread-pool Controls provides Python helpers to limit the number of threads
+ used in the threadpool-backed of common native libraries used for scientific
+ computing and data science (e.g. BLAS and OpenMP).
+ .
+ Fine control of the underlying thread-pool size can be useful in workloads
+ that involve nested parallelism so as to mitigate oversubscription issues.
